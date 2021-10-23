@@ -237,6 +237,7 @@ public class GameFrame extends Frame implements Runnable{
 
     }
 
+    //游戏中按下按键
     private void keyPressedEventRun(int keyCode) {
         switch (keyCode) {
             case KeyEvent.VK_UP:
@@ -261,6 +262,10 @@ public class GameFrame extends Frame implements Runnable{
             case KeyEvent.VK_D:
                 myTank.setDir(Tank.DIR_RIGHT);
                 myTank.setState(Tank.STATE_MOVE);
+                break;
+
+            case KeyEvent.VK_SPACE:
+                myTank.fire();
                 break;
         }
     }

@@ -4,7 +4,8 @@ import com.hk.util.Constant;
 import com.hk.util.MyUtil;
 
 import java.awt.*;
-import java.awt.List;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 坦克类
@@ -18,7 +19,7 @@ public class Tank {
     //半径
     public static final int RADIUS = 20;
     //默认速度/帧
-    public static final int DEFAULT_SPEED = 25;
+    public static final int DEFAULT_SPEED = 5;
     //坦克的状态
     public static final int STATE_STAND = 0;
     public static final int STATE_MOVE = 1;
@@ -36,7 +37,7 @@ public class Tank {
     private Color color;
 
     //TODO 炮弹
-    private List bullets = new List();
+    private List<Bullet> bullets = new ArrayList();
 
     public Tank(int x, int y, int dir) {
         this.x = x;
@@ -54,6 +55,11 @@ public class Tank {
     public void draw(Graphics g) {
         g.setColor(color);
         logic();
+        drawTank(g);
+        drawBullets(g);
+    }
+
+    private void drawTank (Graphics g) {
         //绘制坦克的圆
         g.fillOval(x - RADIUS, y - RADIUS, RADIUS << 1, RADIUS << 1);
         int endX = x, endY = y;
@@ -125,6 +131,35 @@ public class Tank {
         }
     }
 
+    //开火
+    public void fire() {
+        System.out.println("fire");
+        int bulletX = x;
+        int bulletY = y;
+        switch (dir) {
+            case DIR_UP:
+                bulletY -= 2*RADIUS;
+                break;
+            case DIR_DOWN:
+                bulletY += 2*RADIUS;
+                break;
+            case DIR_LEFT:
+                bulletX -= 2*RADIUS;
+                break;
+            case DIR_RIGHT:
+                bulletX += 2*RADIUS;
+                break;
+        }
+        Bullet bullet = new Bullet(bulletX,bulletY,dir,atk,color);
+        bullets.add(bullet);
+    }
+
+    //绘制当前坦克发射的所有子弹
+    private void drawBullets (Graphics g) {
+        for (Bullet bullet : bullets) {
+            bullet.draw(g);
+        }
+    }
 
     public int getX() {
         return x;
@@ -190,11 +225,11 @@ public class Tank {
         this.color = color;
     }
 
-    public List getBullets() {
+    public java.util.List<Bullet> getBullets() {
         return bullets;
     }
 
-    public void setBullets(List bullets) {
+    public void setBullets(java.util.List<Bullet> bullets) {
         this.bullets = bullets;
     }
 }
