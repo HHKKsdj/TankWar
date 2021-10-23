@@ -1,5 +1,6 @@
 package com.hk.game;
 
+import com.hk.util.BulletsPool;
 import com.hk.util.Constant;
 import com.hk.util.MyUtil;
 
@@ -11,6 +12,25 @@ import java.util.List;
  * 坦克类
  */
 public class Tank {
+
+    //贴图
+    private static Image[] tankImg;
+    private static Image[] enemyImg;
+    static {
+        tankImg = new Image[4];
+        tankImg[0] = Toolkit.getDefaultToolkit().createImage("res/tank_up.png");
+        tankImg[1] = Toolkit.getDefaultToolkit().createImage("res/tank_down.png");
+        tankImg[2] = Toolkit.getDefaultToolkit().createImage("res/tank_left.png");
+        tankImg[3] = Toolkit.getDefaultToolkit().createImage("res/tank_right.png");
+
+        enemyImg = new Image[4];
+        enemyImg[0] = Toolkit.getDefaultToolkit().createImage("res/enemy_up.png");
+        enemyImg[1] = Toolkit.getDefaultToolkit().createImage("res/enemy_down.png");
+        enemyImg[2] = Toolkit.getDefaultToolkit().createImage("res/enemy_left.png");
+        enemyImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy_right.png");
+    }
+
+
     //四个方向
     public static final int DIR_UP = 0;
     public static final int DIR_DOWN = 1;
@@ -36,7 +56,7 @@ public class Tank {
     private int state = STATE_STAND;
     private Color color;
 
-    //TODO 炮弹
+    //炮弹
     private List<Bullet> bullets = new ArrayList();
 
     public Tank(int x, int y, int dir) {
@@ -55,10 +75,17 @@ public class Tank {
     public void draw(Graphics g) {
         g.setColor(color);
         logic();
-        drawTank(g);
+        drawImgTank(g);
         drawBullets(g);
     }
 
+    //使用图片绘制坦克
+    private void drawImgTank (Graphics g) {
+        g.drawImage(tankImg[dir],x-RADIUS,y-RADIUS,null );
+    }
+
+/**
+    //使用系统方式绘制坦克
     private void drawTank (Graphics g) {
         //绘制坦克的圆
         g.fillOval(x - RADIUS, y - RADIUS, RADIUS << 1, RADIUS << 1);
@@ -87,6 +114,7 @@ public class Tank {
         }
         g.drawLine(x, y, endX, endY);
     }
+*/
 
     //坦克逻辑处理
     private void logic() {
@@ -134,23 +162,32 @@ public class Tank {
     //开火
     public void fire() {
         System.out.println("fire");
-        int bulletX = x;
-        int bulletY = y;
+        int bulletX = x ;
+        int bulletY = y ;
         switch (dir) {
             case DIR_UP:
-                bulletY -= 2*RADIUS;
+                bulletY -= RADIUS;
                 break;
             case DIR_DOWN:
-                bulletY += 2*RADIUS;
+                bulletY += RADIUS;
                 break;
             case DIR_LEFT:
-                bulletX -= 2*RADIUS;
+                bulletX -= RADIUS;
                 break;
             case DIR_RIGHT:
-                bulletX += 2*RADIUS;
+                bulletX += RADIUS;
                 break;
         }
-        Bullet bullet = new Bullet(bulletX,bulletY,dir,atk,color);
+
+        Bullet bullet = BulletsPool.get();
+        bullet.setX(bulletX);
+        bullet.setY(bulletY);
+        bullet.setDir(dir);
+        bullet.setSpeed(speed);
+        bullet.setAtk(atk);
+        bullet.setColor(color);
+        bullet.setVisible(true);
+        //Bullet bullet = new Bullet(bulletX,bulletY,dir,atk,color);
         bullets.add(bullet);
     }
 
@@ -158,6 +195,14 @@ public class Tank {
     private void drawBullets (Graphics g) {
         for (Bullet bullet : bullets) {
             bullet.draw(g);
+        }
+        //移除不可见子弹
+        for (int i=0; i< bullets.size(); i++) {
+            Bullet bullet = bullets.get(i);
+            if (!bullet.isVisible()) {
+                Bullet remove = bullets.remove(i);
+                BulletsPool.theReturn(remove);
+            }
         }
     }
 

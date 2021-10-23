@@ -5,6 +5,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
 
 import static com.hk.util.Constant.*;
 /**
@@ -12,6 +13,8 @@ import static com.hk.util.Constant.*;
  * 所有游戏展示的内容都要在该类中实现
  */
 public class GameFrame extends Frame implements Runnable{
+    //定义一张与屏幕大小一致的图片
+    private BufferedImage bufImg = new BufferedImage(FRAME_WIDTH,FRAME_HEIGHT,BufferedImage.TYPE_4BYTE_ABGR);
     //游戏状态
     public static int gameState;
     //菜单指向
@@ -66,10 +69,12 @@ public class GameFrame extends Frame implements Runnable{
      * 所有需要在屏幕中显示的内容
      * 都需要在该方法中调用。该方法不能主动调用。
      * 必须调用repaint()去回调该方法
-     * @param g
+     * @param g1
      * update为刷新，导致页面一直出不来，故更改为paint
      */
-    public void update(Graphics g){
+    public void update(Graphics g1){
+        //得到图片画笔
+        Graphics g = bufImg.getGraphics();
         g.setFont(GAME_FONT);
         switch (gameState) {
             case STATE_MENU -> drawMenu(g);
@@ -78,6 +83,9 @@ public class GameFrame extends Frame implements Runnable{
             case STATE_RUN -> drawRun(g);
             case STATE_OVER -> drawOver(g);
         }
+
+        //使用系统画笔将图片绘制到frame上
+        g1.drawImage(bufImg,0,0,null);
     }
 
     private void drawOver(Graphics g) {
