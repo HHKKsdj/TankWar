@@ -37,4 +37,12 @@ public class Constant {
     public static final Font GAME_FONT =new Font("幼圆",Font.BOLD,24);
 
     public static final int REPAINT_INTERAL = 30;
+
+    //最大敌人数量
+    public static final int ENEMY_MAX_COUNT = 10;
+
+    public static final int ENEMY_BORN_INTERVAL = 5000;
+
+    public static final int ENEMY_AI_INTERVAL = 3000;
+    public static final double ENEMY_FIRE_PERCENT = 0.03;
 }

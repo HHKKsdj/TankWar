@@ -1,11 +1,17 @@
 package com.hk.game;
 
+import com.hk.tank.EnemyTank;
+import com.hk.tank.MyTank;
+import com.hk.tank.Tank;
+
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.hk.util.Constant.*;
 /**
@@ -25,6 +31,7 @@ public class GameFrame extends Frame implements Runnable{
 
     private Tank myTank;
 
+    private List<Tank> enemies = new ArrayList();
     /**
      * 对窗口进行初始化
      */
@@ -96,8 +103,16 @@ public class GameFrame extends Frame implements Runnable{
         //绘制黑色的背景
         g.setColor(Color.BLACK);
         g.fillRect(0,0,FRAME_WIDTH,FRAME_HEIGHT);
-
+        drawEnemies(g);
         myTank.draw(g);
+        bulletCollideTank();
+    }
+
+    //绘制敌方坦克
+    private void drawEnemies (Graphics g) {
+        for (Tank enemy : enemies) {
+            enemy.draw(g);
+        }
     }
 
     private void drawAbout(Graphics g) {
@@ -232,7 +247,25 @@ public class GameFrame extends Frame implements Runnable{
     private void newGame() {
         gameState=STATE_RUN;
         //创建坦克对象、敌人的坦克对象
-        myTank=new Tank(400,200,Tank.DIR_DOWN);
+        myTank=new MyTank(400,200,Tank.DIR_DOWN);
+
+        //使用单独线程控制生产敌人坦克
+        new Thread() {
+            @Override
+            public void run () {
+                while (true) {
+                    if (enemies.size() < ENEMY_MAX_COUNT) {
+                        Tank enemy = EnemyTank.createEnemy();
+                        enemies.add(enemy);
+                    }
+                    try {
+                        Thread.sleep(ENEMY_BORN_INTERVAL);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }.start();
 
     }
 
@@ -291,6 +324,16 @@ public class GameFrame extends Frame implements Runnable{
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+
+    private void bulletCollideTank () {
+        for (Tank enemy : enemies) {
+            //打人
+            enemy.collideBullets(myTank.getBullets());
+            //被打
+            myTank.collideBullets(enemy.getBullets());
         }
     }
 }

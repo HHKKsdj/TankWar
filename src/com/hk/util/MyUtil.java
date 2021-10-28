@@ -29,4 +29,15 @@ public class MyUtil {
         Color c=new Color(red,green,blue);
         return c;
     }
+
+    //钜形与点碰撞检测
+    public  static final boolean isCollide(int rectX, int rectY, int radius, int pointX, int pointY) {
+        int disX =Math.abs(rectX - pointX);
+        int disY =Math.abs(rectY - pointY);
+        if (disX < radius && disY < radius) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

@@ -1,14 +1,15 @@
 package com.hk.game;
 
+import com.hk.tank.Tank;
 import com.hk.util.Constant;
 
 import java.awt.*;
 
 public class Bullet {
-    public static final int DEFAULT_SPEED = Tank.DEFAULT_SPEED * 2;
+    public static final int DEFAULT_SPEED = Tank.DEFAULT_SPEED*2;
     public static final int RADIUS = 4;
     private int x,y;
-    private int speed = DEFAULT_SPEED;
+    private int bulletSpeed = DEFAULT_SPEED;
     private int dir;
     private int atk;
     private Color color;
@@ -41,27 +42,32 @@ public class Bullet {
     }
 
     private void move() {
+        //System.out.println(bulletSpeed);
         switch (dir) {
             case Tank.DIR_UP:
-                y -= speed;
+                y -= DEFAULT_SPEED;
+//                y -= bulletSpeed;
                 if (y < 0) {
                     visible = false;
                 }
                 break;
             case Tank.DIR_DOWN:
-                y += speed;
+                y += DEFAULT_SPEED;
+//                y += bulletSpeed;
                 if (y > Constant.FRAME_HEIGHT) {
                     visible = false;
                 }
                 break;
             case Tank.DIR_LEFT:
-                x -= speed;
+                x -= DEFAULT_SPEED;
+//                x -= bulletSpeed;
                 if (x < 0) {
                     visible = false;
                 }
                 break;
             case Tank.DIR_RIGHT:
-                x += speed;
+                x += DEFAULT_SPEED;
+//                x += bulletSpeed;
                 if (x > Constant.FRAME_WIDTH) {
                     visible = false;
                 }
@@ -78,7 +84,7 @@ public class Bullet {
     }
 
     public int getSpeed() {
-        return speed;
+        return bulletSpeed;
     }
 
     public int getDir() {
@@ -102,7 +108,7 @@ public class Bullet {
     }
 
     public void setSpeed(int speed) {
-        this.speed = speed;
+        this.bulletSpeed = speed;
     }
 
     public void setDir(int dir) {

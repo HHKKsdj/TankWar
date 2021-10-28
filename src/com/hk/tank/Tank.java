@@ -1,5 +1,7 @@
-package com.hk.game;
+package com.hk.tank;
 
+import com.hk.game.Bullet;
+import com.hk.game.GameFrame;
 import com.hk.util.BulletsPool;
 import com.hk.util.Constant;
 import com.hk.util.MyUtil;
@@ -11,24 +13,7 @@ import java.util.List;
 /**
  * 坦克类
  */
-public class Tank {
-
-    //贴图
-    private static Image[] tankImg;
-    private static Image[] enemyImg;
-    static {
-        tankImg = new Image[4];
-        tankImg[0] = Toolkit.getDefaultToolkit().createImage("res/tank_up.png");
-        tankImg[1] = Toolkit.getDefaultToolkit().createImage("res/tank_down.png");
-        tankImg[2] = Toolkit.getDefaultToolkit().createImage("res/tank_left.png");
-        tankImg[3] = Toolkit.getDefaultToolkit().createImage("res/tank_right.png");
-
-        enemyImg = new Image[4];
-        enemyImg[0] = Toolkit.getDefaultToolkit().createImage("res/enemy_up.png");
-        enemyImg[1] = Toolkit.getDefaultToolkit().createImage("res/enemy_down.png");
-        enemyImg[2] = Toolkit.getDefaultToolkit().createImage("res/enemy_left.png");
-        enemyImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy_right.png");
-    }
+public abstract class Tank {
 
 
     //四个方向
@@ -55,7 +40,7 @@ public class Tank {
     private int dir;
     private int state = STATE_STAND;
     private Color color;
-
+    private boolean isEnemy = false;
     //炮弹
     private List<Bullet> bullets = new ArrayList();
 
@@ -65,6 +50,8 @@ public class Tank {
         this.dir = dir;
         color = MyUtil.getRandomColor();
     }
+
+
 
     /**
      * |
@@ -80,9 +67,7 @@ public class Tank {
     }
 
     //使用图片绘制坦克
-    private void drawImgTank (Graphics g) {
-        g.drawImage(tankImg[dir],x-RADIUS,y-RADIUS,null );
-    }
+    public abstract void drawImgTank (Graphics g);
 
 /**
     //使用系统方式绘制坦克
@@ -161,7 +146,6 @@ public class Tank {
 
     //开火
     public void fire() {
-        System.out.println("fire");
         int bulletX = x ;
         int bulletY = y ;
         switch (dir) {
@@ -202,6 +186,15 @@ public class Tank {
             if (!bullet.isVisible()) {
                 Bullet remove = bullets.remove(i);
                 BulletsPool.theReturn(remove);
+            }
+        }
+    }
+
+    //坦克与子弹碰撞
+    public void collideBullets (List<Bullet> bullets) {
+        for (Bullet bullet : bullets) {
+            if (MyUtil.isCollide(x,y,RADIUS,bullet.getX(),bullet.getY())) {
+                bullet.setVisible(false);
             }
         }
     }
@@ -270,11 +263,19 @@ public class Tank {
         this.color = color;
     }
 
-    public java.util.List<Bullet> getBullets() {
+    public boolean isEnemy() {
+        return isEnemy;
+    }
+
+    public void setEnemy(boolean enemy) {
+        isEnemy = enemy;
+    }
+
+    public List<Bullet> getBullets() {
         return bullets;
     }
 
-    public void setBullets(java.util.List<Bullet> bullets) {
+    public void setBullets(List<Bullet> bullets) {
         this.bullets = bullets;
     }
 }
