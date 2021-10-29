@@ -7,7 +7,7 @@ import java.awt.*;
 
 public class Bullet {
     public static final int DEFAULT_SPEED = Tank.DEFAULT_SPEED*2;
-    public static final int RADIUS = 4;
+    public static final int RADIUS = 5;
     private int x,y;
     private int bulletSpeed = DEFAULT_SPEED;
     private int dir;

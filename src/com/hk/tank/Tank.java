@@ -1,9 +1,11 @@
 package com.hk.tank;
 
 import com.hk.game.Bullet;
+import com.hk.game.Explode;
 import com.hk.game.GameFrame;
 import com.hk.util.BulletsPool;
 import com.hk.util.Constant;
+import com.hk.util.ExplodesPool;
 import com.hk.util.MyUtil;
 
 import java.awt.*;
@@ -14,7 +16,6 @@ import java.util.List;
  * 坦克类
  */
 public abstract class Tank {
-
 
     //四个方向
     public static final int DIR_UP = 0;
@@ -42,7 +43,9 @@ public abstract class Tank {
     private Color color;
     private boolean isEnemy = false;
     //炮弹
-    private List<Bullet> bullets = new ArrayList();
+    private List<Bullet> bullets = new ArrayList<>();
+    //爆炸效果
+    private List<Explode> explodes = new ArrayList<>();
 
     public Tank(int x, int y, int dir) {
         this.x = x;
@@ -186,6 +189,7 @@ public abstract class Tank {
             if (!bullet.isVisible()) {
                 Bullet remove = bullets.remove(i);
                 BulletsPool.theReturn(remove);
+                i--;
             }
         }
     }
@@ -193,8 +197,33 @@ public abstract class Tank {
     //坦克与子弹碰撞
     public void collideBullets (List<Bullet> bullets) {
         for (Bullet bullet : bullets) {
-            if (MyUtil.isCollide(x,y,RADIUS,bullet.getX(),bullet.getY())) {
+            int bulletX = bullet.getX();
+            int bulletY = bullet.getY();
+            if (MyUtil.isCollide(x,y,RADIUS,bulletX,bulletY)) {
                 bullet.setVisible(false);
+
+                Explode explode = ExplodesPool.get();
+                explode.setX(x);
+                explode.setY(y+RADIUS);
+                explode.setVisible(true);
+                explode.setIndex(0);
+                explodes.add(explode);
+            }
+        }
+    }
+
+    //绘制爆炸
+    public void drawExplodes (Graphics g) {
+        for (Explode explode : explodes) {
+            explode.draw(g);
+        }
+        //将不可见的爆炸效果归还
+        for (int i = 0; i < explodes.size(); i++) {
+            Explode explode = explodes.get(i);
+            if (!explode.isVisible()) {
+                Explode remove = explodes.remove(i);
+                ExplodesPool.theReturn(remove);
+                i--;
             }
         }
     }

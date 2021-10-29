@@ -9,7 +9,7 @@ import java.util.List;
 public class BulletsPool {
     public static final int DEFAULT_POOL_SIZE = 200;
     public static final int POOL_MAX_SIZE = 300;
-    //用于保存所以子弹的容器
+    //用于保存所有子弹的容器
     private static List<Bullet> pool = new ArrayList<>();
 
     static {

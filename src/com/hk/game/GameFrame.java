@@ -106,6 +106,7 @@ public class GameFrame extends Frame implements Runnable{
         drawEnemies(g);
         myTank.draw(g);
         bulletCollideTank();
+        drawExplodes(g);
     }
 
     //绘制敌方坦克
@@ -335,5 +336,12 @@ public class GameFrame extends Frame implements Runnable{
             //被打
             myTank.collideBullets(enemy.getBullets());
         }
+    }
+
+    private void drawExplodes (Graphics g) {
+        for (Tank enemy : enemies) {
+            enemy.drawExplodes(g);
+        }
+        myTank.drawExplodes(g);
     }
 }
