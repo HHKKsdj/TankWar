@@ -3,10 +3,7 @@ package com.hk.tank;
 import com.hk.game.Bullet;
 import com.hk.game.Explode;
 import com.hk.game.GameFrame;
-import com.hk.util.BulletsPool;
-import com.hk.util.Constant;
-import com.hk.util.ExplodesPool;
-import com.hk.util.MyUtil;
+import com.hk.util.*;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -35,13 +32,17 @@ public abstract class Tank {
 
     private int x, y;
 
-    private int hp;
+    private String name;
+    private int hp = DEFAULT_HP;
     private int atk;
     private int speed = DEFAULT_SPEED;
     private int dir;
     private int state = STATE_STAND;
     private Color color;
     private boolean isEnemy = false;
+
+    private BloodBar bar = new BloodBar();
+
     //炮弹
     private List<Bullet> bullets = new ArrayList<>();
     //爆炸效果
@@ -51,10 +52,16 @@ public abstract class Tank {
         this.x = x;
         this.y = y;
         this.dir = dir;
+        this.atk = 100;
         color = MyUtil.getRandomColor();
+        name = MyUtil.getRandomName();
     }
 
-
+    public Tank() {
+        this.atk = 100;
+        color = MyUtil.getRandomColor();
+        name = MyUtil.getRandomName();
+    }
 
     /**
      * |
@@ -63,10 +70,18 @@ public abstract class Tank {
      * @param g
      */
     public void draw(Graphics g) {
-        g.setColor(color);
+//        g.setColor(color);
         logic();
         drawImgTank(g);
         drawBullets(g);
+        drawName(g);
+        bar.draw(g);
+    }
+
+    private void drawName (Graphics g) {
+        g.setColor(color);
+        g.setFont(Constant.SMALL_FONT);
+        g.drawString(name,x-RADIUS/2,y-35);
     }
 
     //使用图片绘制坦克
@@ -194,6 +209,14 @@ public abstract class Tank {
         }
     }
 
+    //销毁坦克回收子弹
+    public void bulletsReturn(){
+        for (Bullet bullet : bullets) {
+            BulletsPool.theReturn(bullet);
+        }
+        bullets.clear();
+    }
+
     //坦克与子弹碰撞
     public void collideBullets (List<Bullet> bullets) {
         for (Bullet bullet : bullets) {
@@ -202,6 +225,10 @@ public abstract class Tank {
             if (MyUtil.isCollide(x,y,RADIUS,bulletX,bulletY)) {
                 bullet.setVisible(false);
 
+                //伤害
+                hurt(bullet);
+
+                //爆炸效果
                 Explode explode = ExplodesPool.get();
                 explode.setX(x);
                 explode.setY(y+RADIUS);
@@ -210,6 +237,30 @@ public abstract class Tank {
                 explodes.add(explode);
             }
         }
+    }
+
+    //受到伤害
+    private void hurt(Bullet bullet) {
+        int atk = bullet.getAtk();
+        hp -= atk;
+        if (hp<0){
+            hp = 0;
+            die();
+        }
+    }
+
+    //死亡
+    private void die() {
+        if (isEnemy) {
+            EnemyTanksPool.theReturn(this);
+        } else {
+            GameFrame.setGameState(Constant.STATE_OVER);
+        }
+    }
+
+    //判断是否死亡
+    public boolean isDie() {
+        return hp <= 0;
     }
 
     //绘制爆炸
@@ -225,6 +276,24 @@ public abstract class Tank {
                 ExplodesPool.theReturn(remove);
                 i--;
             }
+        }
+    }
+
+    //内部类，血条
+    class BloodBar {
+        public static final int BAR_LENGTH = 50;
+        public static final int BAR_HEIGHT = 5;
+
+        public void draw(Graphics g) {
+            //底色
+            g.setColor(Color.yellow);
+            g.fillRect(x-RADIUS,y-RADIUS-BAR_HEIGHT*2,BAR_LENGTH,BAR_HEIGHT);
+            //血量
+            g.setColor(Color.red);
+            g.fillRect(x-RADIUS,y-RADIUS-BAR_HEIGHT*2,hp*BAR_LENGTH/DEFAULT_HP,BAR_HEIGHT);
+            //边框
+            g.setColor(Color.white);
+            g.drawRect(x-RADIUS,y-RADIUS-BAR_HEIGHT*2,BAR_LENGTH,BAR_HEIGHT);
         }
     }
 
@@ -306,5 +375,13 @@ public abstract class Tank {
 
     public void setBullets(List<Bullet> bullets) {
         this.bullets = bullets;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

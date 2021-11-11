@@ -2,6 +2,7 @@ package com.hk.tank;
 
 import com.hk.game.GameFrame;
 import com.hk.util.Constant;
+import com.hk.util.EnemyTanksPool;
 import com.hk.util.MyUtil;
 
 import java.awt.*;
@@ -19,19 +20,29 @@ public class EnemyTank extends Tank {
         enemyImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy_right.png");
     }
 
-    public EnemyTank(int x, int y, int dir) {
+    private EnemyTank(int x, int y, int dir) {
         super(x, y, dir);
         //AI计时
         AITime = System.currentTimeMillis();
     }
+
+    public EnemyTank(){
+        AITime = System.currentTimeMillis();
+    }
+
     public static Tank createEnemy() {
         int x = MyUtil.getRandomNumber(0,2) == 0 ? RADIUS :
                 Constant.FRAME_WIDTH - RADIUS;
         int y = GameFrame.titleBarH + RADIUS;
         int dir = DIR_DOWN;
-        Tank enemy = new EnemyTank(x,y,dir);
+//        Tank enemy = new EnemyTank(x,y,dir);
+        Tank enemy = EnemyTanksPool.get();
+        enemy.setX(x);
+        enemy.setY(y);
+        enemy.setDir(dir);
         enemy.setEnemy(true);
         enemy.setState(STATE_MOVE);
+        enemy.setHp(DEFAULT_HP);
         return enemy;
     }
 

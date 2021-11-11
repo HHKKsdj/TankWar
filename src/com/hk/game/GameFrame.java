@@ -3,6 +3,8 @@ package com.hk.game;
 import com.hk.tank.EnemyTank;
 import com.hk.tank.MyTank;
 import com.hk.tank.Tank;
+import com.hk.util.Constant;
+import com.hk.util.MyUtil;
 
 import java.awt.*;
 import java.awt.event.KeyAdapter;
@@ -21,8 +23,9 @@ import static com.hk.util.Constant.*;
 public class GameFrame extends Frame implements Runnable{
     //定义一张与屏幕大小一致的图片
     private BufferedImage bufImg = new BufferedImage(FRAME_WIDTH,FRAME_HEIGHT,BufferedImage.TYPE_4BYTE_ABGR);
+    private Image overImg = null;
     //游戏状态
-    public static int gameState;
+    private static int gameState;
     //菜单指向
     private int menuIndex;
 
@@ -96,7 +99,15 @@ public class GameFrame extends Frame implements Runnable{
     }
 
     private void drawOver(Graphics g) {
-
+        if (overImg == null) {
+            overImg = Toolkit.getDefaultToolkit().createImage("res/over.jpeg");
+        }
+        int imgW = overImg.getWidth(null);
+        int imgH = overImg.getHeight(null);
+        g.drawImage(overImg,(FRAME_WIDTH-imgW)/2,(FRAME_HEIGHT-imgW)/2,null);
+        g.setColor(Color.white);
+        g.drawString(OVER_STR0,10,FRAME_HEIGHT-20);
+        g.drawString(OVER_STR1,FRAME_WIDTH-250,FRAME_HEIGHT-20);
     }
 
     private void drawRun(Graphics g) {
@@ -111,7 +122,13 @@ public class GameFrame extends Frame implements Runnable{
 
     //绘制敌方坦克
     private void drawEnemies (Graphics g) {
-        for (Tank enemy : enemies) {
+        for (int i=0; i<enemies.size(); i++) {
+            Tank enemy = enemies.get(i);
+            if (enemy.isDie()){
+                enemies.remove(i);
+                i--;
+                continue;
+            }
             enemy.draw(g);
         }
     }
@@ -236,7 +253,6 @@ public class GameFrame extends Frame implements Runnable{
                 break;
 
             case KeyEvent.VK_ENTER:
-                //TODO
                 newGame();
                 break;
         }
@@ -263,6 +279,9 @@ public class GameFrame extends Frame implements Runnable{
                         Thread.sleep(ENEMY_BORN_INTERVAL);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+                    if (gameState != STATE_RUN) {
+                        break;
                     }
                 }
             }
@@ -313,7 +332,22 @@ public class GameFrame extends Frame implements Runnable{
     }
 
     private void keyPressedEventOver(int keyCode) {
+        if (keyCode == KeyEvent.VK_ESCAPE) {
+            System.exit(0);
+        } else if (keyCode == KeyEvent.VK_ENTER) {
+            setGameState(STATE_MENU);
+            resetGame();
+        }
+    }
 
+    private void resetGame () {
+        menuIndex = 0;
+        myTank.bulletsReturn();
+        myTank = null;
+        for (Tank enemy : enemies) {
+            enemy.bulletsReturn();
+        }
+        enemies.clear();
     }
 
     @Override
@@ -343,5 +377,13 @@ public class GameFrame extends Frame implements Runnable{
             enemy.drawExplodes(g);
         }
         myTank.drawExplodes(g);
+    }
+
+    public static int getGameState() {
+        return gameState;
+    }
+
+    public static void setGameState(int gameState) {
+        GameFrame.gameState = gameState;
     }
 }
