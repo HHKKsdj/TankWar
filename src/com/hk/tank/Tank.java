@@ -3,6 +3,7 @@ package com.hk.tank;
 import com.hk.game.Bullet;
 import com.hk.game.Explode;
 import com.hk.game.GameFrame;
+import com.hk.map.MapBrick;
 import com.hk.util.*;
 
 import java.awt.*;
@@ -132,8 +133,12 @@ public abstract class Tank {
         }
     }
 
+    private int oldX = -1, oldY = -1;
+
     //坦克移动功能
     private void move () {
+        oldX = x;
+        oldY = y;
         switch (dir) {
             case DIR_UP:
                 y -= speed;
@@ -229,14 +234,19 @@ public abstract class Tank {
                 hurt(bullet);
 
                 //爆炸效果
-                Explode explode = ExplodesPool.get();
-                explode.setX(x);
-                explode.setY(y+RADIUS);
-                explode.setVisible(true);
-                explode.setIndex(0);
-                explodes.add(explode);
+                addExplode(x,y+RADIUS);
             }
         }
+    }
+
+    private void addExplode(int x,int y){
+        //爆炸效果
+        Explode explode = ExplodesPool.get();
+        explode.setX(x);
+        explode.setY(y+RADIUS);
+        explode.setVisible(true);
+        explode.setIndex(0);
+        explodes.add(explode);
     }
 
     //受到伤害
@@ -295,6 +305,81 @@ public abstract class Tank {
             g.setColor(Color.white);
             g.drawRect(x-RADIUS,y-RADIUS-BAR_HEIGHT*2,BAR_LENGTH,BAR_HEIGHT);
         }
+    }
+
+    //坦克子弹与地图碰撞
+    public void bulletCollideMapBricks(List<MapBrick> bricks) {
+        for (MapBrick brick : bricks) {
+            if (brick.isCollideBullet(bullets)) {
+                //爆炸效果
+                addExplode(brick.getX()+MapBrick.radius,brick.getY()+MapBrick.brickW);
+
+                brick.setVisible(false);
+                MapBrickPool.theReturn(brick);
+            }
+        }
+    }
+
+    public boolean isCollideBrick(List<MapBrick> bricks){
+        for (MapBrick brick : bricks) {
+            //左上
+            int brickX = brick.getX();
+            int brickY = brick.getY();
+            boolean collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //中上
+            brickX += MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //右上
+            brickX += MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //右中
+            brickY += MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //右下
+            brickY += MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //下中
+            brickX -= MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //左下
+            brickX -= MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+            //左中
+            brickY -= MapBrick.radius;
+            collide = MyUtil.isCollide(x, y, RADIUS, brickX, brickY);
+            if (collide) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    //坦克回退
+    public void back(){
+        x = oldX;
+        y = oldY;
     }
 
     public int getX() {

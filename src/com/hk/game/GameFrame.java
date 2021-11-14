@@ -1,5 +1,7 @@
 package com.hk.game;
 
+import com.hk.map.GameMap;
+import com.hk.map.MapBrick;
 import com.hk.tank.EnemyTank;
 import com.hk.tank.MyTank;
 import com.hk.tank.Tank;
@@ -35,6 +37,10 @@ public class GameFrame extends Frame implements Runnable{
     private Tank myTank;
 
     private List<Tank> enemies = new ArrayList();
+
+    //地图
+    private GameMap gameMap;
+
     /**
      * 对窗口进行初始化
      */
@@ -114,9 +120,15 @@ public class GameFrame extends Frame implements Runnable{
         //绘制黑色的背景
         g.setColor(Color.BLACK);
         g.fillRect(0,0,FRAME_WIDTH,FRAME_HEIGHT);
+
+        //绘制地图
+        gameMap.draw(g);
+
         drawEnemies(g);
         myTank.draw(g);
         bulletCollideTank();
+        bulletCollideMapBrick();
+
         drawExplodes(g);
     }
 
@@ -264,7 +276,9 @@ public class GameFrame extends Frame implements Runnable{
     private void newGame() {
         gameState=STATE_RUN;
         //创建坦克对象、敌人的坦克对象
-        myTank=new MyTank(400,200,Tank.DIR_DOWN);
+        myTank=new MyTank(FRAME_WIDTH/3,FRAME_HEIGHT-Tank.RADIUS*2,Tank.DIR_UP);
+
+        gameMap = new GameMap();
 
         //使用单独线程控制生产敌人坦克
         new Thread() {
@@ -348,6 +362,7 @@ public class GameFrame extends Frame implements Runnable{
             enemy.bulletsReturn();
         }
         enemies.clear();
+        gameMap = null;
     }
 
     @Override
@@ -372,12 +387,32 @@ public class GameFrame extends Frame implements Runnable{
         }
     }
 
+    //子弹与地图块碰撞
+    private void bulletCollideMapBrick(){
+        myTank.bulletCollideMapBricks(gameMap.getBricks());
+        for (Tank enemy : enemies) {
+            enemy.bulletCollideMapBricks(gameMap.getBricks());
+        }
+        //坦克和地图碰撞
+        if (myTank.isCollideBrick(gameMap.getBricks())) {
+            myTank.back();
+        }
+        for (Tank enemy : enemies) {
+            if (enemy.isCollideBrick(gameMap.getBricks())){
+                enemy.back();
+            }
+        }
+        //清理被销毁的地图块
+        gameMap.clearDestoryBrick();
+    }
+
     private void drawExplodes (Graphics g) {
         for (Tank enemy : enemies) {
             enemy.drawExplodes(g);
         }
         myTank.drawExplodes(g);
     }
+
 
     public static int getGameState() {
         return gameState;

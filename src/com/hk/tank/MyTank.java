@@ -20,4 +20,5 @@ public class MyTank extends Tank{
     public void drawImgTank(Graphics g) {
         g.drawImage(tankImg[getDir()],getX()-RADIUS,getY()-RADIUS,null );
     }
+
 }
