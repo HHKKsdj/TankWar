@@ -8,25 +8,37 @@ import com.hk.util.MyUtil;
 import java.awt.*;
 
 public class EnemyTank extends Tank {
-    private static Image[] enemyImg;
+    public static final int TYPE_GRAY = 0;
+    public static final int TYPE_GREEN = 1;
+    private int type = TYPE_GRAY;
+    private static Image[] grayImg;
+    private static Image[] greenImg;
     //AI5秒计时开始时间
     private long AITime;
 
     static {
-        enemyImg = new Image[4];
-        enemyImg[0] = Toolkit.getDefaultToolkit().createImage("res/enemy_up.png");
-        enemyImg[1] = Toolkit.getDefaultToolkit().createImage("res/enemy_down.png");
-        enemyImg[2] = Toolkit.getDefaultToolkit().createImage("res/enemy_left.png");
-        enemyImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy_right.png");
+        grayImg = new Image[4];
+        grayImg[0] = Toolkit.getDefaultToolkit().createImage("res/enemy_up.png");
+        grayImg[1] = Toolkit.getDefaultToolkit().createImage("res/enemy_down.png");
+        grayImg[2] = Toolkit.getDefaultToolkit().createImage("res/enemy_left.png");
+        grayImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy_right.png");
+
+        greenImg = new Image[4];
+        greenImg[0] = Toolkit.getDefaultToolkit().createImage("res/enemy2_up.png");
+        greenImg[1] = Toolkit.getDefaultToolkit().createImage("res/enemy2_down.png");
+        greenImg[2] = Toolkit.getDefaultToolkit().createImage("res/enemy2_left.png");
+        greenImg[3] = Toolkit.getDefaultToolkit().createImage("res/enemy2_right.png");
     }
 
     private EnemyTank(int x, int y, int dir) {
         super(x, y, dir);
         //AI计时
         AITime = System.currentTimeMillis();
+        type = MyUtil.getRandomNumber(0,2);
     }
 
     public EnemyTank(){
+        type = MyUtil.getRandomNumber(0,2);
         AITime = System.currentTimeMillis();
     }
 
@@ -47,7 +59,12 @@ public class EnemyTank extends Tank {
     }
 
     public void drawImgTank(Graphics g) {
-        g.drawImage(enemyImg[getDir()],getX()-RADIUS,getY()-RADIUS,null );
+        if (type == TYPE_GRAY) {
+            g.drawImage(grayImg[getDir()],getX()-RADIUS,getY()-RADIUS,null );
+        } else {
+            g.drawImage(greenImg[getDir()],getX()-RADIUS,getY()-RADIUS,null );
+        }
+
         AI();
     }
 
@@ -65,4 +82,11 @@ public class EnemyTank extends Tank {
         }
     }
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 }

@@ -167,35 +167,41 @@ public abstract class Tank {
         }
     }
 
+    //上次开火时间
+    private long fireTime;
+    public static final int FIRE_INTERVAL = 500;
     //开火
     public void fire() {
-        int bulletX = x ;
-        int bulletY = y ;
-        switch (dir) {
-            case DIR_UP:
-                bulletY -= RADIUS;
-                break;
-            case DIR_DOWN:
-                bulletY += RADIUS;
-                break;
-            case DIR_LEFT:
-                bulletX -= RADIUS;
-                break;
-            case DIR_RIGHT:
-                bulletX += RADIUS;
-                break;
-        }
+        if (System.currentTimeMillis()-fireTime>FIRE_INTERVAL){
+            int bulletX = x ;
+            int bulletY = y ;
+            switch (dir) {
+                case DIR_UP:
+                    bulletY -= RADIUS;
+                    break;
+                case DIR_DOWN:
+                    bulletY += RADIUS;
+                    break;
+                case DIR_LEFT:
+                    bulletX -= RADIUS;
+                    break;
+                case DIR_RIGHT:
+                    bulletX += RADIUS;
+                    break;
+            }
 
-        Bullet bullet = BulletsPool.get();
-        bullet.setX(bulletX);
-        bullet.setY(bulletY);
-        bullet.setDir(dir);
-        bullet.setSpeed(speed);
-        bullet.setAtk(atk);
-        bullet.setColor(color);
-        bullet.setVisible(true);
-        //Bullet bullet = new Bullet(bulletX,bulletY,dir,atk,color);
-        bullets.add(bullet);
+            Bullet bullet = BulletsPool.get();
+            bullet.setX(bulletX);
+            bullet.setY(bulletY);
+            bullet.setDir(dir);
+            bullet.setSpeed(speed);
+            bullet.setAtk(atk);
+            bullet.setColor(color);
+            bullet.setVisible(true);
+            //Bullet bullet = new Bullet(bulletX,bulletY,dir,atk,color);
+            bullets.add(bullet);
+        }
+        fireTime = System.currentTimeMillis();
     }
 
     //绘制当前坦克发射的所有子弹
@@ -264,7 +270,8 @@ public abstract class Tank {
         if (isEnemy) {
             EnemyTanksPool.theReturn(this);
         } else {
-            GameFrame.setGameState(Constant.STATE_OVER);
+            delaySecondsToOver(1000);
+
         }
     }
 
@@ -316,8 +323,27 @@ public abstract class Tank {
 
                 brick.setVisible(false);
                 MapBrickPool.theReturn(brick);
+
+                //击毁老巢
+                if (brick.isHome()){
+                    delaySecondsToOver(1000);
+                }
+
             }
         }
+    }
+
+    private void delaySecondsToOver(int millisSecond){
+        new Thread(){
+            public void run(){
+                try {
+                    Thread.sleep(millisSecond);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                GameFrame.setGameState(Constant.STATE_OVER);
+            }
+        }.start();
     }
 
     public boolean isCollideBrick(List<MapBrick> bricks){

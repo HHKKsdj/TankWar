@@ -20,25 +20,39 @@ public class GameMap {
     //地图块容器
     private List<MapBrick> bricks = new ArrayList<>();
 
+    //大本营
+    private Home home;
+
     public GameMap() {
         initMap();
     }
 
     //初始化
     private void initMap() {
-        final int COUNT = 20;
-        for (int i = 0; i < COUNT; i++) {
-            MapBrick brick = MapBrickPool.get();
-            int x = MyUtil.getRandomNumber(MAP_X,MAP_X+MAP_WIGHT-MapBrick.brickW);
-            int y = MyUtil.getRandomNumber(MAP_Y,MAP_Y+MAP_HEIGHT-MapBrick.brickW);
-            if (isCollide(bricks,x,y)){
-                i--;
-                continue;
-            }
-            brick.setX(x);
-            brick.setY(y);
-            bricks.add(brick);
-        }
+//        final int COUNT = 20;
+//        for (int i = 0; i < COUNT; i++) {
+//            MapBrick brick = MapBrickPool.get();
+//            int x = MyUtil.getRandomNumber(MAP_X,MAP_X+MAP_WIGHT-MapBrick.brickW);
+//            int y = MyUtil.getRandomNumber(MAP_Y,MAP_Y+MAP_HEIGHT-MapBrick.brickW);
+//            if (isCollide(bricks,x,y)){
+//                i--;
+//                continue;
+//            }
+//            brick.setX(x);
+//            brick.setY(y);
+//            bricks.add(brick);
+//        }
+
+        addRow(MAP_X,MAP_Y,MAP_X+MAP_WIGHT,MapBrick.TYPE_NORMAL,0);
+        addRow(MAP_X,MAP_Y+MapBrick.brickW*2,MAP_X+MAP_WIGHT,MapBrick.TYPE_COVER,0);
+        addRow(MAP_X,MAP_Y+MapBrick.brickW*4,MAP_X+MAP_WIGHT,MapBrick.TYPE_HARD,MapBrick.brickW);
+
+        home = new Home();
+        addHome();
+    }
+
+    private void addHome(){
+        bricks.addAll(home.getBricks());
     }
 
     //判断地图快是否重合
@@ -57,6 +71,7 @@ public class GameMap {
         for (MapBrick brick : bricks) {
             brick.draw(g);
         }
+
     }
 
     public void clearDestoryBrick(){
@@ -68,7 +83,21 @@ public class GameMap {
         }
     }
 
+    //往地图块容器中添加一行指定类型的地图块
+    public void addRow(int startX,int startY,int endX,int type,final int DIS){
+        int count = (endX-startX)/(MapBrick.brickW+DIS);
+        for (int i = 0; i < count; i++) {
+            MapBrick brick = MapBrickPool.get();
+            brick.setType(type);
+            brick.setX(startX+i*(MapBrick.brickW+DIS));
+            brick.setY(startY);
+            bricks.add(brick);
+        }
+    }
+
     public List<MapBrick> getBricks() {
         return bricks;
     }
+
+
 }

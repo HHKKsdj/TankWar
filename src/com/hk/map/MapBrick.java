@@ -8,15 +8,25 @@ import java.awt.*;
 import java.util.List;
 
 public class MapBrick {
-    private static Image brickImg;
-    public static int brickW = 40;
+    public static final int TYPE_NORMAL = 0;
+    public static final int TYPE_HOME = 1;
+    public static final int TYPE_COVER = 2;
+    public static final int TYPE_HARD = 3;
+//    private static Image brickImg;
+    public static int brickW = 50;
     public static int radius = brickW/2;
-    public static int brickH;
+    public int type = TYPE_NORMAL;
+
+    private static Image[] brickImg;
 
     static {
-        brickImg = Toolkit.getDefaultToolkit().createImage("res/brick.png");
+        brickImg = new Image[4];
+        brickImg[TYPE_NORMAL] = Toolkit.getDefaultToolkit().createImage("res/brick.png");
+        brickImg[TYPE_HOME] = Toolkit.getDefaultToolkit().createImage("res/home.png");
+        brickImg[TYPE_COVER] = Toolkit.getDefaultToolkit().createImage("res/cover.png");
+        brickImg[TYPE_HARD] = Toolkit.getDefaultToolkit().createImage("res/hard.png");
         if (brickW<=0){
-            brickW = brickImg.getWidth(null);
+            brickW = brickImg[TYPE_NORMAL].getWidth(null);
         }
     }
 
@@ -31,7 +41,7 @@ public class MapBrick {
         this.x = x;
         this.y = y;
         if (brickW<=0){
-            brickW = brickImg.getWidth(null);
+            brickW = brickImg[TYPE_NORMAL].getWidth(null);
         }
     }
     public void draw(Graphics g) {
@@ -39,9 +49,32 @@ public class MapBrick {
             return;
         }
         if (brickW<=0){
-            brickW = brickImg.getWidth(null);
+            brickW = brickImg[TYPE_NORMAL].getWidth(null);
         }
-        g.drawImage(brickImg,x,y,null);
+        g.drawImage(brickImg[type],x,y,null);
+    }
+
+
+    //子弹碰撞检测
+    public boolean isCollideBullet(List<Bullet> bullets){
+        if (!visible) {
+            return false;
+        }
+        for (Bullet bullet : bullets) {
+            int bulletX = bullet.getX();
+            int bulletY = bullet.getY();
+            boolean collide = MyUtil.isCollide(x + radius, y + radius, radius, bulletX, bulletY);
+            if (collide) {
+                bullet.setVisible(false);
+                BulletsPool.theReturn(bullet);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isHome(){
+        return type == TYPE_HOME;
     }
 
 
@@ -69,21 +102,11 @@ public class MapBrick {
         this.visible = visible;
     }
 
-    //子弹碰撞检测
-    public boolean isCollideBullet(List<Bullet> bullets){
-        if (!visible) {
-            return false;
-        }
-        for (Bullet bullet : bullets) {
-            int bulletX = bullet.getX();
-            int bulletY = bullet.getY();
-            boolean collide = MyUtil.isCollide(x + radius, y + radius, radius, bulletX, bulletY);
-            if (collide) {
-                bullet.setVisible(false);
-                BulletsPool.theReturn(bullet);
-                return true;
-            }
-        }
-        return false;
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
